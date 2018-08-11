@@ -1,0 +1,53 @@
+# This is a TOML document. Boom.
+
+title = "TOML Example"
+
+[dbload]
+# 동시 쓰레드 갯수
+threadnum  = 1
+# DB DML 의  입력값 범위
+paramrange = [ 1, 2000 ]
+
+# bmt 대상 DB 설정
+[[database]]
+	dbproduct = "altibase7"
+	driver       = "Altibase.jdbc.driver.AltibaseDriver"
+	url          = "jdbc:Altibase://192.168.56.1:20300/mydb"
+	user        = "sys"
+	passwd    = "manager"
+	initquery   = [ "drop table tb_test" , 
+	                "create table tb_test( c1 integer, c2 integer, c3 integer, c4 date)" 
+	               ]
+	insertparams= [ "NUMBER", "NUMBER", "NUMBER"]
+	insertquery = "INSERT INTO TB_TEST (C1, C2, C3, C4 ) VALUES (?,?,?, SYSDATE)"
+
+	selectparams= [ "NUMBER" ]
+	selectquery = "SELECT * FROM TB_TEST WHERE C1=?"
+
+	updateparams= [ "NUMBER" ]
+	updatequery = "UPDATE TB_TEST SET C2=C2+1, C4=C4+1 TB_TEST WHERE C1=?"
+
+	deleteparmas= [ "NUMBER" ]
+	deletequery = "DELETE FROM TB_TEST WHERE C1=?"
+
+# bmt 대상 DB 설정		
+[[database]]
+	dbproduct      = "oracle11g"
+	driver      = "Altibase.jdbc.driver.AltibaseDriver"
+	url         = "jdbc:Altibase://192.168.56.1:20300/mydb"
+	user        = "sys"
+	passwd    = "manager"
+	initquery   = [ "drop table tb_test" , 
+	                "create table tb_test( c1 integer, c2 integer, c3 integer, c4 date)" 
+	               ]
+	insertparams= [ "NUMBER", "NUMBER", "NUMBER"]
+	insertquery = "INSERT INTO TB_TEST (C1, C2, C3, C4 ) VALUES (?,?,?, SYSDATE)"
+
+	selectparams= [ "NUMBER" ]
+	selectquery = "SELECT * FROM TB_TEST WHERE C1=?"
+
+	updateparams= [ "NUMBER" ]
+	updatequery = "UPDATE TB_TEST SET C2=C2+1, C4=C4+1 TB_TEST WHERE C1=?"
+
+	deleteparmas= [ "NUMBER" ]
+	deletequery = "DELETE FROM TB_TEST WHERE C1=?"
