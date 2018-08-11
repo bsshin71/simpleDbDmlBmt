@@ -13,6 +13,7 @@ public class DmlRunner implements Runnable {
 
 	private   int  runMode;
 	private   int  startValue, endValue;
+	private   int  thread_number;
 	
 	public static final int INSERT = 1;
 	public static final int UPDATE = 2;
