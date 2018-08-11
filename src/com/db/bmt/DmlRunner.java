@@ -11,9 +11,9 @@ public class DmlRunner implements Runnable {
 	private  Connection 			conn        = null;
 	private  PreparedStatement 	pstmt       = null;
 
-	private   int  runMode;
-	private   int  startValue, endValue;
-	private   int  thread_number;
+	private   int    runMode;
+	private   long  startValue, endValue;
+	private   int    thread_number;
 	
 	public static final int INSERT = 1;
 	public static final int UPDATE = 2;
