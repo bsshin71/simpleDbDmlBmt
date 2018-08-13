@@ -25,43 +25,61 @@ import com.moandjiezana.toml.Toml;
 
 public class MainClass {
 
-	public static void main(String[] args) {
-
-		Logger log  = LoggerFactory.getLogger( MainClass.class );
-		
-		long   threadnum     = 0;   // 총 thread 수 
-		long   startvalue    = 0;   // bmt value 시작값
-		long   endvalue      = 0;   // bmt value 최종값
-		long   quota         = 0;   // 쓰레드당 처리할 구간범위 
-		long   remainder     = 0;   // 최종 쓰레드가 추가로 처리할 값
-		
+	Logger log  = LoggerFactory.getLogger( this.getClass() );
+	
+	long   threadnum     =  0;   // 총 thread 수 
+	long   startvalue    =  0;   // bmt value 시작값
+	long   endvalue      =  0;   // bmt value 최종값
+	long   interval      =  0;   // bmt value 의  범위
+	long   quota         =  0;   // 쓰레드당 처리할 구간범위 
+	long   remainder     =  0;   // 최종 쓰레드가 추가로 처리할 값
+	long[] threadalloc   = null; // 쓰레드당 처리할 범위를 배열에 담든다. 나머지값을 알 쪽 쓰레브부터 더 처리하도록 할당 하기 위해서..
+	Toml   configfile;
+	Toml   dbload;
+	
+	public void loadConfig(String file ) {
 		log.info("begin paring configuration file....");
 		
-		Toml toml        = new Toml().read( new File("conf/bmt.toml") );
-		Toml dbload      = toml.getTable("dbload");
+		this.configfile  = new Toml().read( new File(file) );
+		this.dbload      = configfile.getTable("dbload");
 		
 		threadnum        = dbload.getLong("threadnum").longValue();
 		List<Long> range = dbload.getList("paramrange");
 
 		startvalue       = (Long) range.get(0).longValue();
 		endvalue         = (Long) range.get(1).longValue();
-		quota            = (long) Math.ceil ( ( endvalue - startvalue) / threadnum );
-		remainder        = endvalue - ( threadnum * quota );
+		interval         =  endvalue - startvalue + 1;
+		quota            = (long) Math.floor ( ( endvalue - startvalue) / threadnum );
+		remainder        = interval - ( threadnum * quota );
 		
-		List<Toml>  databases = toml.getTables("database");
+		this.threadalloc  = new long[( int) threadnum];
+		
+		// 쓰데드별로 처리할 양을 배열에 담는다. 배열에 담긴 값을 이용해서  쓰레드별로 start, end값을 계산하는 데 이용한다.
+		// 처리할 범위가  쓰레드 개수로 나누어서 딱 떨어지지 않을 경우  그 나머지 값들을 처리할 쓰레드가 필요하다.
+		// 앞쪽 쓰레드 부터  나머지 값을 한개씩 할당해 준다.
+		for( int i = 0; i < threadnum; i++ ) {
+			if ( i < remainder ) 
+				threadalloc[i] =  quota + 1;  // 나머지 할당..
+			else
+				threadalloc[i] =  quota;
+			
+			log.debug(" threadalloc["+i+"] = " + threadalloc[i]);
+		}
+
+	}
+	
+	public void runBmt() {
+		
+		log.debug(" start rum bmt ~~~~");
+		
+		List<Toml>  databases = configfile.getTables("database");
 		for(int i=0; i < databases.size(); i++ ) {
 			Toml       db    = (Toml) databases.get(i);
 			DbConInfo dbinfo = db.to( DbConInfo.class );
 			
-			if ( dbinfo.getBmt().intValue() == 0 ) {
+			if ( dbinfo.getEnable().intValue() == 0 ) {
 				log.info(" skip bmt : " + dbinfo.getDbproduct() );
 				continue;  // do not run bmt for this database
-			}
-			
-			List<String> initquery = dbinfo.getInitquery();
-			for( int j=0; j < initquery.size(); j++) {
-				String query = (String) initquery.get(j);
-				System.out.println(" initquery [" + j + "] = " + query );
 			}
 			
 			DmlRunner dbinit  =  new DmlRunner( dbinfo );
@@ -72,8 +90,9 @@ public class MainClass {
 			long endnum;                 // 쓰레드별 종료값
 			
 			for( int j = 0;   j < threadnum;  j++ ) {
-				endnum = ( (j+1) == threadnum ) ? ( j +  1 ) * quota + remainder :  ( j +  1 ) * quota ;
+				endnum =  startnum + threadalloc[j] - 1 ;
 				
+				log.debug( " thread["+j+"]  start="+startnum + ", endnum="+ endnum + " threadalloc=["+j+"]="+ threadalloc[j]);
 				log.debug("threadnum = " +  j );
 				log.debug("startnum  = " +  startnum );
 				log.debug("endnum    = " +  endnum   );
@@ -82,12 +101,20 @@ public class MainClass {
 				dml.setRunRange ( startnum, endnum );
 				dml.setRunMode  ( DML_TYPE.INSERT  );
 				
-				startnum = startnum + endnum;
+				startnum = endnum + 1;
 				
-				Thread   thread   = new Thread( dml,  "A" );
+				Thread   thread   = new Thread( dml,  "thread-"+j );
 				thread.start();
 			}
 			System.out.println("============= end of " + dbinfo.getDbproduct() + "============" );
 		}
+	}
+	
+	public static void main(String[] args) {
+
+		MainClass main = new MainClass();
+		
+		main.loadConfig( "conf/bmt.toml" );
+		main.runBmt();
 	}
 }

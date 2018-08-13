@@ -4,14 +4,14 @@ title = "TOML Example"
 
 [dbload]
 # 동시 쓰레드 갯수
-threadnum  = 2
+threadnum  = 3
 # DB DML 의  입력값 범위
-paramrange = [ 1, 10000 ]
+paramrange = [ 1, 20000 ]
 
 # bmt 대상 DB 설정
 [[database]]
-# bmt  = 1 이면 bmt 실행
-     bmt          = 1
+# enable  = 1 이면 bmt 실행
+     enable     = 1
 	dbproduct = "altibase7"
 	driver       = "Altibase.jdbc.driver.AltibaseDriver"
 	url          = "jdbc:Altibase://192.168.56.1:20300/mydb"
@@ -36,7 +36,7 @@ paramrange = [ 1, 10000 ]
 
 # bmt 대상 DB 설정		
 [[database]]
-    bmt                 = 0
+    enable                 = 0
 	dbproduct      = "oracle11g"
 	driver      = "Altibase.jdbc.driver.AltibaseDriver"
 	url         = "jdbc:Altibase://192.168.56.1:20300/mydb"

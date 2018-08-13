@@ -4,7 +4,7 @@ import java.util.List;
 
 public class DbConInfo {
 
-	public Long          bmt ;
+	public Long          enable ;
 	public String        url ;
 	public String        driver;
 	public String        user  ;
@@ -105,11 +105,11 @@ public class DbConInfo {
 	public void setDeletequery(String deletequery) {
 		this.deletequery = deletequery;
 	}
-	public Long getBmt() {
-		return bmt;
+	public Long getEnable() {
+		return enable;
 	}
-	public void setBmt(Long bmt) {
-		this.bmt = bmt;
+	public void setEnable(Long bmt) {
+		this.enable = bmt;
 	}
 	
 }
