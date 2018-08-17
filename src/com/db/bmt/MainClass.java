@@ -27,15 +27,18 @@ public class MainClass {
 
 	Logger log  = LoggerFactory.getLogger( this.getClass() );
 	
-	long   threadnum     =  0;   // 총 thread 수 
-	long   startvalue    =  0;   // bmt value 시작값
-	long   endvalue      =  0;   // bmt value 최종값
-	long   interval      =  0;   // bmt value 의  범위
-	long   quota         =  0;   // 쓰레드당 처리할 구간범위 
-	long   remainder     =  0;   // 최종 쓰레드가 추가로 처리할 값
-	long[] threadalloc   = null; // 쓰레드당 처리할 범위를 배열에 담든다. 나머지값을 알 쪽 쓰레브부터 더 처리하도록 할당 하기 위해서..
+	long   threadnum     ;   // 총 thread 수 
+	long   startvalue    ;   // bmt value 시작값
+	long   endvalue      ;   // bmt value 최종값
+	long   commitcount   ;   // commit count
+	
+	long   interval      ;   // bmt value 의  범위
+	long   quota         ;   // 쓰레드당 처리할 구간범위 
+	long   remainder     ;   // 최종 쓰레드가 추가로 처리할 값
+	long[] threadalloc  = null; // 쓰레드당 처리할 범위를 배열에 담든다. 나머지값을 알 쪽 쓰레브부터 더 처리하도록 할당 하기 위해서..
 	Toml   configfile;
 	Toml   dbload;
+	
 	
 	public void loadConfig(String file ) {
 		log.info("begin paring configuration file....");
@@ -44,8 +47,8 @@ public class MainClass {
 		this.dbload      = configfile.getTable("dbload");
 		
 		threadnum        = dbload.getLong("threadnum").longValue();
+		commitcount      = dbload.getLong("commitcount").longValue();
 		List<Long> range = dbload.getList("paramrange");
-
 		startvalue       = (Long) range.get(0).longValue();
 		endvalue         = (Long) range.get(1).longValue();
 		interval         =  endvalue - startvalue + 1;
@@ -89,6 +92,9 @@ public class MainClass {
 			long startnum = startvalue;  // 쓰레드별 시작값
 			long endnum;                 // 쓰레드별 종료값
 			
+			CheckTime []checktime = new CheckTime[ (int)threadnum ];
+			Thread    []thread    = new Thread[ (int)threadnum ];
+			
 			for( int j = 0;   j < threadnum;  j++ ) {
 				endnum =  startnum + threadalloc[j] - 1 ;
 				
@@ -97,15 +103,29 @@ public class MainClass {
 				log.debug("startnum  = " +  startnum );
 				log.debug("endnum    = " +  endnum   );
 				
+				checktime[j] = new CheckTime();
 				DmlRunner  dml    = new DmlRunner( dbinfo );
+				dml.setCommitcount( commitcount );
 				dml.setRunRange ( startnum, endnum );
 				dml.setRunMode  ( DML_TYPE.INSERT  );
+				dml.setChecktime( checktime[j] );
 				
 				startnum = endnum + 1;
 				
-				Thread   thread   = new Thread( dml,  "thread-"+j );
-				thread.start();
+				thread[j]   = new Thread( dml,  "thread-"+j );
+				thread[j].start();
+				
 			}
+			// Wait until Thread done.
+			for( int j = 0;   j < threadnum;  j++ ) {
+				try {
+					thread[j].join();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
 			System.out.println("============= end of " + dbinfo.getDbproduct() + "============" );
 		}
 	}

@@ -8,6 +8,9 @@ threadnum  = 3
 # DB DML 의  입력값 범위
 paramrange = [ 1, 20000 ]
 
+# commit 주기 > 1    autocommit  off
+commitcount=100
+
 # bmt 대상 DB 설정
 [[database]]
 # enable  = 1 이면 bmt 실행
@@ -17,9 +20,11 @@ paramrange = [ 1, 20000 ]
 	url          = "jdbc:Altibase://192.168.56.1:20300/mydb"
 	user        = "sys"
 	passwd    = "manager"
+# 	runinitquery=1 이면 initquery를 dml 실행전에 실행함.
+	runinitquery=1
 	initquery   = [ "drop table tb_test" , 
-	                "create table tb_test( c1 integer, c2 integer, c3 integer, c4 date)" 
-	               ]
+	                      "create table tb_test( c1 integer, c2 integer, c3 integer, c4 date)" 
+	                    ]
 
 # INT, LONG, DOUBLE, VARCHAR, STRING	               
 	insertparams= [ "int", "int", "int"]      
@@ -42,6 +47,8 @@ paramrange = [ 1, 20000 ]
 	url         = "jdbc:Altibase://192.168.56.1:20300/mydb"
 	user        = "sys"
 	passwd    = "manager"
+# 	runinitquery=1 이면 initquery를 dml 실행전에 실행함.
+	runinitquery=1
 	initquery   = [ "drop table tb_test" , 
 	                "create table tb_test( c1 integer, c2 integer, c3 integer, c4 date)" 
 	               ]

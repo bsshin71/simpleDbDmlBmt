@@ -10,6 +10,7 @@ public class DbConInfo {
 	public String        user  ;
 	public String        passwd;
 	public String        dbproduct;
+	public Long          runinitquery;
 	public List<String> initquery ;
 	public List<String> insertparams ;
 	public String        insertquery;
@@ -50,6 +51,12 @@ public class DbConInfo {
 	}
 	public void setDbproduct(String dbproduct) {
 		this.dbproduct = dbproduct;
+	}
+	public Long getRuninitquery() {
+		return runinitquery;
+	}
+	public void setRuninitquery(Long runinitquery) {
+		this.runinitquery = runinitquery;
 	}
 	public List<String> getInitquery() {
 		return initquery;
