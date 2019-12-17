@@ -66,7 +66,7 @@ public class MainClass {
 			else
 				threadalloc[i] =  quota;
 			
-			log.debug(" threadalloc["+i+"] = " + threadalloc[i]);
+			log.debug(" threadalloc[ "+i+"] = " + threadalloc[i]);
 		}
 
 	}

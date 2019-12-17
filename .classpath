@@ -18,7 +18,7 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/eclipse-workspace/SimpleDbDmlBmt/driver/Alti6.5.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/DEV/git/simpleDbDmlBmt/driver/Alti6.5.1.jar"/>
 	<classpathentry kind="lib" path="conf"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
