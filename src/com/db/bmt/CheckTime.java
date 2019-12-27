@@ -15,7 +15,7 @@ public class CheckTime {
 	} 
 	
 	public void putLapTime(String name, long elapsed ) {
-		this.laptime.put(name, new Long( elapsed ));
+		this.laptime.put(name, new Long( elapsed ) );
 	}
 
 }
